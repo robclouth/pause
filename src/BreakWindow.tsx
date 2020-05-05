@@ -1,13 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet } from "react-native";
-import {
-  createMuiTheme,
-  ThemeProvider,
-  useTheme
-} from "@material-ui/core/styles";
-import { Box, Paper, LinearProgress, Typography } from "@material-ui/core";
+import { LinearProgress, Paper, Typography } from "@material-ui/core";
+import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import { ipcRenderer } from "electron";
-import { useSpring, animated } from "react-spring";
+import React, { useEffect, useState } from "react";
+import { animated, useSpring } from "react-spring";
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -15,7 +10,7 @@ const darkTheme = createMuiTheme({
   }
 });
 
-export default function App() {
+export default function BreakWindow() {
   const [breakProgress, setBreakProgress] = useState(-1);
   const [message, setMessage] = useState("");
   const [flash, setFlash] = useState(false);

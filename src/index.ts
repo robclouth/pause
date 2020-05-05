@@ -1,4 +1,4 @@
-"use strict";
+declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 
 import {
   BrowserWindow,
@@ -9,18 +9,25 @@ import {
   screen,
   shell
 } from "electron";
-import * as path from "path";
-import { format as formatUrl } from "url";
+import childProcess from "child_process";
+import path from "path";
+import fs from "fs";
+//@ts-ignore
 import activeWin from "active-win";
-import { autoUpdater } from "electron-updater";
-
+//@ts-ignore
 import Config from "electron-config";
+
 const config = new Config();
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
-// global reference to mainWindow (necessary to prevent window from being garbage collected)
-let breakWindow;
+// Handle creating/removing shortcuts on Windows when installing/uninstalling.
+if (require("electron-squirrel-startup")) {
+  // eslint-disable-line global-require
+  app.quit();
+}
+
+let breakWindow: BrowserWindow;
 
 function createBreakWindow() {
   const mainScreen = screen.getPrimaryDisplay();
@@ -36,27 +43,10 @@ function createBreakWindow() {
     webPreferences: { nodeIntegration: true }
   });
 
+  browserWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
   if (isDevelopment) {
     browserWindow.webContents.openDevTools();
   }
-
-  if (isDevelopment) {
-    browserWindow.loadURL(
-      `http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`
-    );
-  } else {
-    browserWindow.loadURL(
-      formatUrl({
-        pathname: path.join(__dirname, "index.html"),
-        protocol: "file",
-        slashes: true
-      })
-    );
-  }
-
-  browserWindow.on("closed", () => {
-    breakWindow = null;
-  });
 
   return browserWindow;
 }
@@ -69,7 +59,7 @@ if (!instanceLock) {
   app.quit();
 } else {
   app.whenReady().then(() => {
-    const trayIcon = path.join(__dirname, "tray.png");
+    const trayIcon = path.join(__dirname, require("./assets/tray.png"));
     const image = nativeImage.createFromPath(trayIcon);
     tray = new Tray(image);
     const contextMenu = Menu.buildFromTemplate([
@@ -79,7 +69,10 @@ if (!instanceLock) {
     tray.setToolTip("Pause");
     tray.setContextMenu(contextMenu);
 
-    autoUpdater.checkForUpdatesAndNotify();
+    // autoUpdater.checkForUpdatesAndNotify();
+
+    const executablePath = path.join(__dirname, "native_modules/main");
+    fs.chmodSync(executablePath, "755");
 
     breakWindow = createBreakWindow();
 
@@ -107,12 +100,16 @@ const message = config.get("message");
 
 let breakProgress = 0;
 let breakWarningTimer = 0;
-let breakTimer;
+let breakTimer: NodeJS.Timeout;
 
 function startBreakLoop() {
   setInterval(() => {
-    const activeWindow = activeWin.sync();
-    if (activeWindow && !appList.includes(activeWindow.owner.name)) {
+    try {
+      let activeWindow = activeWin.sync();
+      if (activeWindow && !appList.includes(activeWindow.owner.name)) {
+        return;
+      }
+    } catch {
       return;
     }
 

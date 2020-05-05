@@ -1,67 +1,96 @@
 {
   "name": "pause",
-  "author": "Rob Clouth",
-  "repository": "https://github.com/robclouth/pause",
+  "productName": "Pause",
   "version": "1.0.0",
-  "main": "node_modules/expo/AppEntry.js",
-  "build": {
-    "appId": "com.robclouth.pause",
-    "productName": "Pause",
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "robclouth",
-        "repo": "pause"
-      }
-    ],
-    "dmg": {
-      "contents": [
+  "description": "Take a break",
+  "main": ".webpack/main",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make --platform darwin",
+    "publish": "electron-forge publish --platform darwin",
+    "lint": "eslint --ext .ts ."
+  },
+  "keywords": [],
+  "author": {
+    "name": "Rob Clouth",
+    "email": "rob.clouth@gmail.com"
+  },
+  "license": "MIT",
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "appBundleId": "com.robclouth.pause",
+        "icon": "src/assets/icon"
+      },
+      "makers": [
         {
-          "x": 110,
-          "y": 150
-        },
-        {
-          "x": 240,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
+          "name": "@electron-forge/maker-dmg",
+          "config": {}
         }
+      ],
+      "publishers": [
+        {
+          "name": "@electron-forge/publisher-github",
+          "config": {
+            "repository": {
+              "owner": "robclouth",
+              "name": "pause"
+            }
+          }
+        }
+      ],
+      "plugins": [
+        [
+          "@electron-forge/plugin-webpack",
+          {
+            "mainConfig": "./webpack.main.config.js",
+            "renderer": {
+              "config": "./webpack.renderer.config.js",
+              "entryPoints": [
+                {
+                  "html": "./src/index.html",
+                  "js": "./src/App.tsx",
+                  "name": "main_window"
+                }
+              ]
+            }
+          }
+        ]
       ]
     }
   },
-  "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
-    "eject": "expo eject",
-    "electron": "yarn expo-electron start",
-    "pack": "yarn electron-webpack && yarn electron-builder --dir -c.compression=store -c.mac.identity=null",
-    "dist": "yarn electron-webpack && yarn electron-builder"
+  "devDependencies": {
+    "@electron-forge/cli": "6.0.0-beta.51",
+    "@electron-forge/maker-deb": "6.0.0-beta.51",
+    "@electron-forge/maker-dmg": "^6.0.0-beta.51",
+    "@electron-forge/maker-squirrel": "6.0.0-beta.51",
+    "@electron-forge/maker-zip": "6.0.0-beta.51",
+    "@electron-forge/plugin-webpack": "6.0.0-beta.51",
+    "@electron-forge/publisher-github": "^6.0.0-beta.51",
+    "@marshallofsound/webpack-asset-relocator-loader": "^0.5.0",
+    "@types/react": "^16.9.34",
+    "@types/react-dom": "^16.9.7",
+    "@typescript-eslint/eslint-plugin": "^2.18.0",
+    "@typescript-eslint/parser": "^2.18.0",
+    "css-loader": "^3.0.0",
+    "electron": "8.2.5",
+    "eslint": "^6.8.0",
+    "eslint-plugin-import": "^2.20.0",
+    "file-loader": "^6.0.0",
+    "fork-ts-checker-webpack-plugin": "^3.1.1",
+    "node-loader": "^0.6.0",
+    "style-loader": "^0.23.1",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.0"
   },
   "dependencies": {
     "@material-ui/core": "^4.9.13",
     "active-win": "^6.1.0",
-    "expo": "~37.0.3",
-    "react": "~16.9.0",
-    "react-dom": "~16.9.0",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-37.0.1.tar.gz",
-    "react-native-screens": "~2.2.0",
-    "react-native-web": "~0.11.7",
-    "react-spring": "^8.0.27"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.8.6",
-    "@expo/electron-adapter": "^0.0.0-alpha.52",
-    "@expo/webpack-config": "^0.12.4-alpha.0",
-    "@types/react": "~16.9.23",
-    "@types/react-native": "~0.61.17",
-    "babel-preset-expo": "~8.1.0",
-    "electron": "^6.0.12",
-    "electron-builder": "^22.6.0",
     "electron-config": "^2.0.0",
-    "electron-updater": "^4.3.1",
-    "typescript": "~3.8.3"
-  },
-  "private": true
+    "electron-squirrel-startup": "^1.0.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-spring": "^8.0.27"
+  }
 }

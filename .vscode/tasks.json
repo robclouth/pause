@@ -1,7 +1,4 @@
 {
-  // See https://go.microsoft.com/fwlink/?LinkId=733558
-  // for the documentation about the tasks.json format
-  "version": "2.0.0",
   "tasks": [
     {
       "type": "npm",
@@ -11,6 +8,21 @@
     {
       "type": "npm",
       "script": "dist",
+      "problemMatcher": []
+    },
+    {
+      "type": "npm",
+      "script": "start",
+      "problemMatcher": []
+    },
+    {
+      "type": "npm",
+      "script": "make",
+      "problemMatcher": []
+    },
+    {
+      "type": "npm",
+      "script": "package",
       "problemMatcher": []
     }
   ]
