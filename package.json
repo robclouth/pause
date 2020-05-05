@@ -1,6 +1,8 @@
 {
   "name": "pause",
-  "version": "0.0.1",
+  "author": "Rob Clouth",
+  "repository": "https://github.com/robclouth/pause",
+  "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "build": {
     "appId": "com.robclouth.pause",
