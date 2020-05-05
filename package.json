@@ -16,12 +16,17 @@
     "name": "Rob Clouth",
     "email": "rob.clouth@gmail.com"
   },
+  "repository": "https://github.com/robclouth/pause",
   "license": "MIT",
   "config": {
     "forge": {
       "packagerConfig": {
         "appBundleId": "com.robclouth.pause",
-        "icon": "src/assets/icon"
+        "icon": "src/assets/icon",
+        "osxSign": {
+          "identity": "iPhone Developer: Ramon Manas Corbinos (68YXH5XN9Z)",
+          "hardened-runtime": true
+        }
       },
       "makers": [
         {
@@ -91,6 +96,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-spring": "^8.0.27"
+    "react-spring": "^8.0.27",
+    "update-electron-app": "^1.5.0"
   }
 }

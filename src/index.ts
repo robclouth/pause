@@ -16,10 +16,9 @@ import fs from "fs";
 import activeWin from "active-win";
 //@ts-ignore
 import Config from "electron-config";
-
 const config = new Config();
 
-const isDevelopment = process.env.NODE_ENV !== "production";
+require("update-electron-app")();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -44,10 +43,6 @@ function createBreakWindow() {
   });
 
   browserWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-  // if (isDevelopment) {
-  //   browserWindow.webContents.openDevTools();
-  // }
-
   return browserWindow;
 }
 
@@ -63,13 +58,12 @@ if (!instanceLock) {
     const image = nativeImage.createFromPath(trayIcon);
     tray = new Tray(image);
     const contextMenu = Menu.buildFromTemplate([
-      { label: "Edit config", click: () => shell.openItem(config.path) }
+      { label: "Edit config", click: () => shell.openItem(config.path) },
+      { label: "Quit", click: () => app.quit() }
     ]);
 
     tray.setToolTip("Pause");
     tray.setContextMenu(contextMenu);
-
-    // autoUpdater.checkForUpdatesAndNotify();
 
     const executablePath = path.join(__dirname, "native_modules/main");
     fs.chmodSync(executablePath, "755");
@@ -77,6 +71,10 @@ if (!instanceLock) {
     breakWindow = createBreakWindow();
 
     app.hide();
+    app.setLoginItemSettings({
+      openAtLogin: true,
+      openAsHidden: true
+    });
 
     startBreakLoop();
   });
