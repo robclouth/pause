@@ -9,7 +9,7 @@ import {
   screen,
   shell
 } from "electron";
-import childProcess from "child_process";
+
 import path from "path";
 import fs from "fs";
 //@ts-ignore
@@ -44,9 +44,9 @@ function createBreakWindow() {
   });
 
   browserWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-  if (isDevelopment) {
-    browserWindow.webContents.openDevTools();
-  }
+  // if (isDevelopment) {
+  //   browserWindow.webContents.openDevTools();
+  // }
 
   return browserWindow;
 }
@@ -98,54 +98,65 @@ if (!config.has("message"))
   config.set("message", "Let your arms drop loose and drink some water.");
 const message = config.get("message");
 
+enum State {
+  Waiting,
+  Warning,
+  Break
+}
+
 let breakProgress = 0;
-let breakWarningTimer = 0;
-let breakTimer: NodeJS.Timeout;
+let isActive = false;
+let currState = State.Waiting;
+let seconds = 0;
+const loopSeconds = breakSpacing + breakDuration;
 
-function startBreakLoop() {
-  setInterval(() => {
-    try {
-      let activeWindow = activeWin.sync();
-      if (activeWindow && !appList.includes(activeWindow.owner.name)) {
-        return;
-      }
-    } catch {
-      return;
-    }
-
-    breakProgress = 0;
-    breakWarningTimer = 0;
-
-    if (breakWindow) {
+function setState(nextState: State) {
+  if (currState !== nextState) {
+    if (nextState === State.Waiting) {
+      breakWindow.webContents.send("breakProgress", -1);
+      breakWindow.hide();
+    } else if (nextState === State.Warning) {
       breakWindow.setIgnoreMouseEvents(true);
       breakWindow.setFocusable(false);
       breakWindow.showInactive();
       breakWindow.webContents.send("message", message);
+    } else if (nextState === State.Break) {
+      breakProgress = 0;
+      breakWindow.setIgnoreMouseEvents(false);
+      breakWindow.setFocusable(true);
+      breakWindow.show();
+      breakWindow.webContents.send("breakProgress", 0);
     }
 
-    clearInterval(breakTimer);
-    breakTimer = setInterval(() => {
-      if (breakWarningTimer < breakWarning) {
-        if (breakWindow) breakWindow.webContents.send("breakWarning");
-        breakWarningTimer++;
-        if (breakWarningTimer >= breakWarning) {
-          breakWindow.setIgnoreMouseEvents(false);
-          breakWindow.setFocusable(true);
-          breakWindow.show();
-          breakWindow.webContents.send("breakProgress", 0);
-        }
-      } else {
-        breakProgress += 1 / (breakDuration - 1);
+    currState = nextState;
+  }
+}
 
-        if (breakWindow)
-          breakWindow.webContents.send("breakProgress", breakProgress);
-
-        if (breakProgress > 1) {
-          clearInterval(breakTimer);
-          breakWindow.webContents.send("breakProgress", -1);
-          breakWindow.hide();
-        }
+function startBreakLoop() {
+  setInterval(() => {
+    isActive = false;
+    try {
+      let activeWindow = activeWin.sync();
+      if (activeWindow && appList.includes(activeWindow.owner.name)) {
+        isActive = true;
       }
-    }, 1000);
-  }, (breakSpacing + breakDuration - breakWarningTimer) * 1000);
+    } catch {}
+
+    if ((isActive || currState === State.Break) && breakWindow) {
+      if (seconds >= loopSeconds - breakDuration) setState(State.Break);
+      else if (seconds >= loopSeconds - breakDuration - breakWarning)
+        setState(State.Warning);
+      else setState(State.Waiting);
+
+      if (currState === State.Break) {
+        breakProgress += 1 / breakDuration;
+        breakWindow.webContents.send("breakProgress", breakProgress);
+      } else if (currState === State.Warning) {
+        breakWindow.webContents.send("breakWarning");
+      }
+
+      seconds++;
+      if (seconds >= loopSeconds) seconds = 0;
+    }
+  }, 1000);
 }
