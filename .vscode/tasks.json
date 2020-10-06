@@ -24,6 +24,11 @@
       "type": "npm",
       "script": "package",
       "problemMatcher": []
+    },
+    {
+      "type": "npm",
+      "script": "publish",
+      "problemMatcher": []
     }
   ]
 }

@@ -1,7 +1,7 @@
 {
   "name": "pause",
   "productName": "Pause",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Take a break",
   "main": ".webpack/main",
   "scripts": {
@@ -24,8 +24,15 @@
         "appBundleId": "com.robclouth.pause",
         "icon": "src/assets/icon",
         "osxSign": {
-          "identity": "iPhone Developer: Ramon Manas Corbinos (68YXH5XN9Z)",
-          "hardened-runtime": true
+          "identity": "Developer ID Application: Robert Clouth (4Q5NB7KQDV)",
+          "hardenedRuntime": true,
+          "gatekeeperAssess": false,
+          "entitlements": "entitlements.plist"
+        },
+        "osxNotarize": {
+          "appleId": "rob.clouth@gmail.com",
+          "appleIdPassword": "pqha-nhpg-mips-bmxp",
+          "ascProvider": "4Q5NB7KQDV"
         }
       },
       "makers": [
